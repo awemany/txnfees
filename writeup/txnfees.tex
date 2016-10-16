@@ -1,0 +1,254 @@
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{afterpage}
+\title{Transaction fee extrapolation}
+\author{awemany (reddit, bitco.in)}
+\begin{document}
+\maketitle
+\begin{section}{Overview}
+  Olivier Janssens put up a reward of up to 10
+  BTC\footnote{\url{https://www.reddit.com/r/btc/comments/57anod/can_someone_create_a_transaction_fee_income_graph/}}
+  for producing an extrapolation of transaction income for miners.  This is an
+  entry to this contest.
+
+  This context is held in the wider context of convincing Bitcoin miners to
+  switch their mining hardware to alternative Bitcoin implementations that
+  support on-chain scaling, such as Bitcoin Unlimited.
+
+  On-chain is believed by its proponents (such as the author of this document)
+  to be a key element for Bitcoin's continued success.
+
+  \emph{Disclaimer:} It should be noted that -as all predictions are- they can
+  be wildly inaccurate and the author takes no responsibility for using the
+  data and predictions shown herein. Predictions including exponentials even
+  more so!\footnote{The author does not question the fact that exponentials
+    can \emph{not} go on forever for physical reasons; however the author also
+    assumes that we still have lots of \emph{potential} exponential growth
+    ahead!}  There are also no guarantees that the calculations and estimates
+  done here are even correct. However, the code and data is all out in the
+  open, and anyone is invited to check it all.
+\end{section}
+\begin{section}{Assumptions and method}
+  All data that is used for creating this document has been taken from the
+  charts page of \url{http://blockchain.info/en/charts}. The contained script
+  \texttt{get.sh} shows all commands to fetch an up-to-date set of data, as
+  comma-separated-value (CSV) files.
+
+  For this analysis, data ranging from March, 1st 2009 to Oct, 15th 2016 is
+  used. This corresponds to the \texttt{.csv} files included in the
+  repository.
+
+  Data analysis is done using \texttt{python} (version 2) and its most common
+  data analysis packages: \texttt{numpy}, \texttt{scipy} and \texttt{pandas}.
+  
+  The overall method to reach a graph of transaction income first looks at the
+  historically close relation between transaction rate and market
+  cap(italization) (MCAP). From this, a fit is used to estimate market cap
+  from transaction rate. The author claims in no way novel insights on this
+  relation. It has been prominently been demonstrated by Peter Rizun before.
+  
+  It should be noted that, although, so far, the famous $x^2$ relation holds
+  to a high degree, the correlation (that is presumed to be an indication of
+  Metcalfe's law about the value of scaling networks) is expected to break
+  down at some unknown point in the future.
+  
+  This analysis and extrapolation further assumes that miners will think in
+  dollars instead of BTC for the foreseeable future, and that the prices of
+  equipment etc. are stable, when denominated in \$ (no inflation).
+  
+  It is a common complaint of those intending to scale Bitcoin onchain that
+  onchain transaction volume is being crippled by the 1MB block size limit in
+  place. This crippling can also be clearly seen in the graphs below. For the
+  sake of this analysis, Bitcoin's history so far is divided into three periods:
+
+  \begin{itemize}
+  \item[\emph{Initial stage}]The early stage of growth, until Jan 2013
+  \item[\emph{Early stage}]The time range from Jan 2013 to Dec 2015
+  \item[\emph{Saturation stage}]The time from Dec 2015 till now, where it is assumed
+    that the 1MB has an effect upon maximum transaction rate, and more
+    importantly, also the actions of market participants.
+    \end{itemize}
+  
+
+  Blockchain.info supplies a data set called the \emph{number of transactions
+    excluding popular addresses} (NTEP). The excellent correlation between
+  market cap and transaction rate is especially visible when relating to NTEP.
+
+  As NTEP and total number of transactions seem to converge over time, it is
+  assumed that NTEP is as good as regular total transaction rate for all
+  analyses below, while avoiding the singular cases of Satoshi Dice and
+  similar to influence the MCAP/TXN relation. NTEP excludes the 100 most
+  popular addresses (measured by their number of outputs) from the total
+  transaction rate.
+\clearpage
+\end{section}
+\begin{section}{Transaction rate and market cap}
+  \begin{figure}[h]
+    \includegraphics[width=12cm]{../mcap-vs-txn-fullrange.pdf}
+    \caption{MCAP, NTEP and total transaction rate.\label{fig:mcap-vs-txn-fullrange}}
+    \end{figure}
+  It has prominently been demonstrated by Peter Rizun before that MCAP and NTEP
+  align if $\mathrm{NTEP} \times \mathrm{NTEP}$ is plotted on top of MCAP (in
+  dollars). In Fig.~\ref{fig:mcap-vs-txn-fullrange}, this figure is recreated
+  once more, using recent data. It also includes the NTEP as well as the total
+  number of transactions.
+
+  It can be seen that, as stated above, NTEP and total transaction count
+  converge.  Also visible is that in the \emph{Saturation stage}, the MCAP
+  seems to be suppressed compared to transaction count, presumably due to
+  market actors factoring in the apparent unwillingness of many Bitcoin miners
+  to scale Bitcoin.
+
+  \begin{figure}[h]
+    \includegraphics[width=12cm]{../mcap-vs-txn-scatter-and-fit.pdf}
+    \caption{MCAP vs. NTEP and fit.\label{fig:mcap-vs-txn-scatter-and-fit}}
+  \end{figure}
+  
+  The relation of \begin{equation}
+    \mathrm{MCAP / \$} = \mathrm{NTEP} ^ 2
+    \end{equation}
+  seems to be a close fit already. In
+  Fig.~\ref{fig:mcap-vs-txn-scatter-and-fit}, this relation is displayed
+  once more, but in a different way.  Here the data from the \emph{Initial}
+  and \emph{Early} stage is plotted as green dots, and that of the
+  \emph{Saturation} stage in red.
+
+  The blue line is a linear fit of the green data, of the form
+  \begin{equation}
+  \log(\mathrm{MCAP / \$}) = x \log \mathrm{NTEP} 
+  \end{equation}
+
+  yielding $x=2.03$.
+
+  Clearly visible is the saturation and divergence from the squared behavior
+  for the latest \emph{Saturation} period, where the blocksize limit has a
+  profound effect upon Bitcoin.
+
+\clearpage
+\end{section}
+\begin{section}{Transaction rate models}
+  \begin{figure}[h]
+    \includegraphics[width=12cm]{../txngrowth.pdf}
+    \caption{Transaction rate modeling. \label{fig:txngrowth}}
+  \end{figure}
+  
+  The next step to get an estimate of future transaction rates is to look at
+  past behavior and try to extrapolate from it. In Fig.~\ref{fig:txngrowth},
+  the daily number of transactions (blue curve) is plotted, plus three
+  scenarios for further growth of this rate.
+
+  Green is a very optimistic scenario, and is a linear fit of Bitcoin's
+  transaction rate over the \emph{Initial stage} as well as the
+  \emph{Early Stage} (thus yielding an exponential curve for transaction rate
+  growth). It is highly unlikely that Bitcoin's growth will ever exceed this
+  growth again. This curve would those be the most optimistic miner's
+  expectation, should an open-ended blocksize be implemented soon.
+  
+  Red is the saturation scenario, keeping transaction rate at 1MB, as
+  the indicated direction by several members of the Bitcoin Core team. This red
+  line assumes that the maximum number of transactions per day that have ever
+  been seen is also going to be a good approximation of the future number of
+  transactions for all times.
+  
+  Black is a (in the near term) optimistic scenario that assumes that
+  Bitcoin's transaction rate with will continue to grow for the near future
+  with the same rate as it did in the \emph{Early}, but not the faster
+  \emph{Initial} stage.
+
+  It should be noted that these exponentials can not go on forever, or even a
+  long time - world GDP is currently (Oct
+  2016) \footnote{\url{https://en.wikipedia.org/wiki/Gross_world_product}}
+  approximately $\$10^{14}$. Bitcoin taking over the world would thus happen
+  in the middle of next year, or 2021 in the slightly less optimstic
+  scenario. Both cases deemed highly unlikely by the author.
+  
+\clearpage
+\end{section}
+\begin{section}{Fee models}
+  \begin{figure}
+    \includegraphics[width=12cm]{../fee-income-models.pdf}
+    \caption{Fee modeling.\label{fig:fee-income-models}}
+  \end{figure}
+  
+  Using another leap of faith, the above transaction growth model can be
+  extended into a model for the miner's income. The result of this can be seen
+  in Fig.~\ref{fig:fee-income-models}.
+
+  Using the flat transaction rate of the 1MB case and the two exponential
+  models from the preceding section, and further using the MCAP - NTEP
+  relation from above, total miner income can be estimated.
+  
+  \paragraph{Transaction cost.}{To create this extrapolation,
+    is assumed that, for high on-chain volume scaling, a transaction will cost
+    $\$0.02$ for all times. For the saturated case, both an assumed $\$0.02$
+    as well as a high price of $\$50$ per transaction is plotted.}
+  
+  The MCAP and thus coin price is assumed to follow
+  $\mathrm{MCAP}=\mathrm{NTEP}^{2.03}$ with transaction rate of for the respective
+  model.
+
+  As the above Fig.~\ref{fig:mcap-vs-txn-fullrange} shows, the market likely
+  factored the unwillingness of many Bitcoiners to scale Bitcoin into the
+  price. This means that the transaction rate growth until saturation, as
+  observed in the \emph{Saturation stage} would reflect in a higher expected
+  Bitcoin price even when being stuck with an 1MB limit forever. This higher
+  price amounts to $\approx 5200$ \$/BTC, and an $\mathrm{MCAP}\approx 110
+  \cdot \$ 10^9 $. For both the red and light red curve, this higher, constant
+  MCAP is assumed.
+
+  A further, minor point is that it is further assumed that the coin schedule
+  is aligned to the last halving with exactly 4 years of halving time, in both
+  directions of time. As this will not fit the past issuance schedule (which
+  was sped up due to strong hash rate growth), an initial number of coins is
+  set so that the number of coins at the first halving matches what is
+  expected according to schedule. This should not impact later estimates at
+  all. It is visible as a slight bend of the extrapolated green and black lines
+  on the left side in this last plot.
+
+  That the lines appear jagged is due to the dropping block reward.
+  
+  In this plot, the dark red line is assuming 1MB saturation and corresponding
+  market cap, with a cost of $\$0.02$ per transaction. The light red line
+  assumes an 1MB cap and a much higher cost of $\$50$ per transaction, in case
+  Bitcoin is used primarily as a settlement layer.
+  
+  The green and black line are the exponential models for the \emph{Initial}
+  and \emph{Initial and Early} stage growth of transaction volume, with
+  corresponding market cap growth. Both lines assume a low, constatnt cost of
+  $\$0.02$ per transaction on chain.
+
+  The more optimistic, green line exceeded both red cases a while
+  ago. Approximately today, also the $\$50$ high fee, but satured Bitcoin case
+  is exceeded by an assumed NTEP and MCAP growth.
+\clearpage
+\end{section}
+
+\begin{section}{Conclusions}
+  In Fig.~\ref{fig:mcap-vs-txn-fullrange}, the black curve exceeds the light
+  red curve at about this time.
+  
+  This means that even with an assumption of very high transaction prices in the forced
+  saturation scenario of $\$50/\mathrm{txn}$ (settlement layer) and even
+  further assuming that the growth as indicated by the black line continues only until
+  2018, it would, according to this model, still be much better for miners to
+  allow on-chain growth beyond 1MB.
+
+  The future is uncertain. The author makes no claim that exponential growth
+  will continue forever, but is certain that intentional crippling of
+  Bitcoin's scapability to scale onchain is \emph{not} going to help Bitcoin
+  get any more widespread adoption.
+
+  Furthermore, it should be noted that one of the main arguments of the
+  \emph{small blockist} is that higher level scaling solutions on top of
+  Bitcoin will increase Bitcoin's market cap as well, which might bend the red
+  curve upwards by an unknown amount. The time is now, though, and reliable,
+  usable and widely accepted solutions have not been implemented yet.
+
+  There is also no reason that higher level solutions on top of Bitcoin can not
+  work synergistically with a lifted maximum block size limit.
+\clearpage
+\end{section}
+\end{document}
